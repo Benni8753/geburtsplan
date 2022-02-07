@@ -1,5 +1,8 @@
 import React, { Fragment, useState } from 'react';
+import { connect } from 'react-redux';
+import { PropTypes } from 'prop-types';
 import Checkbox from '@material-ui/core/Checkbox';
+import { register } from '../../actions/auth';
 import FormControlLabel from '@material-ui/core/FormControlLabel';
 import {
   Grid,
@@ -19,7 +22,7 @@ const paperStyle = {
 };
 const btnstyle = { margin: '8px 0' };
 
-const Register = () => {
+const Register = ({ register }) => {
   const [formData, setFormData] = useState({
     firstName: '',
     lastName: '',
@@ -38,7 +41,7 @@ const Register = () => {
     if (password !== password2) {
       console.log('passwords do not match');
     } else {
-      console.log('success');
+      register({ firstName, lastName, email, password });
     }
   };
 
@@ -53,6 +56,7 @@ const Register = () => {
             <TextField
               color='secondary'
               name='email'
+              type='email'
               value={email}
               onChange={(e) => onChange(e)}
               label='Email'
@@ -129,4 +133,8 @@ const Register = () => {
   );
 };
 
-export default Register;
+Register.propTypes = {
+  register: PropTypes.func.isRequired,
+};
+
+export default connect(null, { register })(Register);

@@ -1,6 +1,10 @@
 import React, { Fragment, useState } from 'react';
 import Checkbox from '@material-ui/core/Checkbox';
 import FormControlLabel from '@material-ui/core/FormControlLabel';
+import { connect } from 'react-redux';
+import PropTypes from 'prop-types';
+import { login } from '../../actions/auth';
+
 import {
   Grid,
   Paper,
@@ -19,7 +23,7 @@ const paperStyle = {
 };
 const btnstyle = { margin: '8px 0' };
 
-const Login = () => {
+const Login = ({ login }) => {
   const [formData, setFormData] = useState({
     email: '',
     password: '',
@@ -32,7 +36,7 @@ const Login = () => {
 
   const onSubmit = async (e) => {
     e.preventDefault();
-    console.log('success');
+    login(email, password);
   };
 
   return (
@@ -97,4 +101,8 @@ const Login = () => {
   );
 };
 
-export default Login;
+Login.propTypes = {
+  login: PropTypes.func.isRequired,
+};
+
+export default connect(null, { login })(Login);

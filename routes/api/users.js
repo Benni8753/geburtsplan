@@ -54,6 +54,7 @@ router.post(
       const salt = await bcrypt.genSalt(10);
       user.password = await bcrypt.hash(password, salt);
       //this saves the user to the db
+      console.log('iamd here');
       await user.save();
       //Return Jsonwebtoken
       const payload = {
