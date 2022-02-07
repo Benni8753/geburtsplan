@@ -1,16 +1,21 @@
 import * as React from 'react';
-import AppBar from '@mui/material/AppBar';
-import Box from '@mui/material/Box';
-import Toolbar from '@mui/material/Toolbar';
-import IconButton from '@mui/material/IconButton';
-import Typography from '@mui/material/Typography';
-import Menu from '@mui/material/Menu';
 import MenuIcon from '@mui/icons-material/Menu';
-import Container from '@mui/material/Container';
-import Avatar from '@mui/material/Avatar';
-import Button from '@mui/material/Button';
-import Tooltip from '@mui/material/Tooltip';
-import MenuItem from '@mui/material/MenuItem';
+import BlurOnTwoToneIcon from '@mui/icons-material/BlurOnTwoTone';
+import BlurCircularTwoToneIcon from '@mui/icons-material/BlurCircularTwoTone';
+import {
+  Typography,
+  AppBar,
+  Box,
+  Toolbar,
+  IconButton,
+  Menu,
+  Container,
+  Avatar,
+  Button,
+  Tooltip,
+  MenuItem,
+  CardMedia,
+} from '@mui/material';
 
 const pages = ['Products', 'Pricing', 'Blog'];
 const settings = ['Profile', 'Account', 'Dashboard', 'Logout'];
@@ -42,15 +47,27 @@ const Navbar = () => {
     <AppBar position='static'>
       <Container maxWidth='xl'>
         <Toolbar disableGutters>
-          <Typography
+          {/* <Typography
+            href='/'
             variant='h6'
             noWrap
             component='div'
             sx={{ mr: 2, display: { xs: 'none', md: 'flex' } }}
           >
             LOGO
-          </Typography>
-
+          </Typography> */}
+          <Box
+            component='img'
+            sx={{
+              height: 40,
+              width: 45,
+              maxHeight: { xs: 233, md: 167 },
+              maxWidth: { xs: 350, md: 250 },
+              display: { xs: 'none', md: 'flex' },
+            }}
+            alt='Logo image'
+            src='./logo_ph.png'
+          />
           <Box sx={{ flexGrow: 1, display: { xs: 'flex', md: 'none' } }}>
             <IconButton
               size='large'
@@ -85,14 +102,27 @@ const Navbar = () => {
               </MenuItem>
             </Menu>
           </Box>
-          <Typography
+          {/* <Typography
+            href='/'
             variant='h6'
             noWrap
             component='div'
             sx={{ flexGrow: 1, display: { xs: 'flex', md: 'none' } }}
           >
             LOGO
-          </Typography>
+          </Typography> */}
+          <Box
+            component='img'
+            variant='h6'
+            noWrap
+            sx={{
+              height: 40,
+              width: 45,
+              display: { xs: 'flex', md: 'none' },
+            }}
+            alt='Logo image'
+            src='./logo_ph.png'
+          />
           <Box sx={{ flexGrow: 1, display: { xs: 'none', md: 'flex' } }}>
             <Button
               color='inherit'
@@ -111,7 +141,6 @@ const Navbar = () => {
               Register
             </Button>
           </Box>
-
           <Box sx={{ flexGrow: 0 }}>
             <Tooltip title='Open settings'>
               <IconButton onClick={handleOpenUserMenu} sx={{ p: 0 }}>
