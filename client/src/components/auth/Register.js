@@ -3,6 +3,7 @@ import { connect } from 'react-redux';
 import { PropTypes } from 'prop-types';
 import Checkbox from '@material-ui/core/Checkbox';
 import { register } from '../../actions/auth';
+import { Navigate } from 'react-router-dom';
 import FormControlLabel from '@material-ui/core/FormControlLabel';
 import {
   Grid,
@@ -22,7 +23,7 @@ const paperStyle = {
 };
 const btnstyle = { margin: '8px 0' };
 
-const Register = ({ register }) => {
+const Register = ({ register, isAutenticated }) => {
   const [formData, setFormData] = useState({
     firstName: '',
     lastName: '',
@@ -44,6 +45,10 @@ const Register = ({ register }) => {
       register({ firstName, lastName, email, password });
     }
   };
+
+  if (isAutenticated) {
+    return <Navigate to='/dashboard' />;
+  }
 
   return (
     <Fragment>
@@ -135,6 +140,11 @@ const Register = ({ register }) => {
 
 Register.propTypes = {
   register: PropTypes.func.isRequired,
+  isAuthenticated: PropTypes.bool,
 };
 
-export default connect(null, { register })(Register);
+const mapStateToProps = (state) => ({
+  isAuthenticated: state.auth.isAuthenticated,
+});
+
+export default connect(mapStateToProps, { register })(Register);
