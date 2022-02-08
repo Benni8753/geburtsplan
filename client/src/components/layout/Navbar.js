@@ -1,7 +1,8 @@
-import * as React from 'react';
+import React, { Fragment } from 'react';
 import MenuIcon from '@mui/icons-material/Menu';
-import BlurOnTwoToneIcon from '@mui/icons-material/BlurOnTwoTone';
-import BlurCircularTwoToneIcon from '@mui/icons-material/BlurCircularTwoTone';
+import { connect } from 'react-redux';
+import { logout } from '../../actions/auth';
+import PropTypes from 'prop-types';
 import {
   Typography,
   AppBar,
@@ -14,16 +15,15 @@ import {
   Button,
   Tooltip,
   MenuItem,
-  CardMedia,
 } from '@mui/material';
 
-const pages = ['Products', 'Pricing', 'Blog'];
 const settings = ['Profile', 'Account', 'Dashboard', 'Logout'];
-
-const Navbar = () => {
+//Hooks
+const Navbar = ({ auth: { isAuthenticated, loading }, logout }) => {
   const [anchorElNav, setAnchorElNav] = React.useState(null);
   const [anchorElUser, setAnchorElUser] = React.useState(null);
 
+  //Functions
   const login = () => {
     handleCloseNavMenu();
   };
@@ -42,6 +42,113 @@ const Navbar = () => {
   const handleCloseUserMenu = () => {
     setAnchorElUser(null);
   };
+
+  const authLinks = (
+    <Fragment>
+      <Box
+        component='img'
+        variant='h6'
+        noWrap
+        sx={{
+          height: 40,
+          width: 45,
+          display: { xs: 'flex', md: 'none' },
+        }}
+        alt='Logo image'
+        src='./logo_ph.png'
+      />
+      <Box sx={{ flexGrow: 1, display: { xs: 'none', md: 'flex' } }}>
+        <Button
+          alignContent='center'
+          alignItems='center'
+          color='inherit'
+          href='/'
+          onClick={logout}
+          sx={{ my: 2, display: 'block' }}
+        >
+          Logout
+        </Button>
+        <Button
+          color='inherit'
+          href='/dashboard'
+          sx={{ my: 2, display: 'block' }}
+        >
+          Dashboard
+        </Button>
+        <Button
+          color='inherit'
+          href='/dashboard'
+          sx={{ my: 2, display: 'block' }}
+        >
+          Blog
+        </Button>
+      </Box>
+      <Box sx={{ flexGrow: 0 }}>
+        <Tooltip title='Open settings'>
+          <IconButton onClick={handleOpenUserMenu} sx={{ p: 0 }}>
+            <Avatar alt='Remy Sharp' src='/static/images/avatar/2.jpg' />
+          </IconButton>
+        </Tooltip>
+        <Menu
+          sx={{ mt: '45px' }}
+          id='menu-appbar'
+          anchorEl={anchorElUser}
+          anchorOrigin={{
+            vertical: 'top',
+            horizontal: 'right',
+          }}
+          keepMounted
+          transformOrigin={{
+            vertical: 'top',
+            horizontal: 'right',
+          }}
+          open={Boolean(anchorElUser)}
+          onClose={handleCloseUserMenu}
+        >
+          {settings.map((setting) => (
+            <MenuItem key={setting} onClick={handleCloseUserMenu}>
+              <Typography textAlign='center'>{setting}</Typography>
+            </MenuItem>
+          ))}
+        </Menu>
+      </Box>
+    </Fragment>
+  );
+
+  const guestLinks = (
+    <Fragment>
+      <Box
+        component='img'
+        variant='h6'
+        noWrap
+        sx={{
+          height: 40,
+          width: 45,
+          display: { xs: 'flex', md: 'none' },
+        }}
+        alt='Logo image'
+        src='./logo_ph.png'
+      />
+      <Box sx={{ flexGrow: 1, display: { xs: 'none', md: 'flex' } }}>
+        <Button
+          color='inherit'
+          href='/login'
+          onClick={login}
+          sx={{ my: 2, display: 'block' }}
+        >
+          Login
+        </Button>
+        <Button
+          color='inherit'
+          href='/register'
+          onClick={login}
+          sx={{ my: 2, display: 'block' }}
+        >
+          Register
+        </Button>
+      </Box>
+    </Fragment>
+  );
 
   return (
     <AppBar position='static'>
@@ -111,68 +218,22 @@ const Navbar = () => {
           >
             LOGO
           </Typography> */}
-          <Box
-            component='img'
-            variant='h6'
-            noWrap
-            sx={{
-              height: 40,
-              width: 45,
-              display: { xs: 'flex', md: 'none' },
-            }}
-            alt='Logo image'
-            src='./logo_ph.png'
-          />
-          <Box sx={{ flexGrow: 1, display: { xs: 'none', md: 'flex' } }}>
-            <Button
-              color='inherit'
-              href='/login'
-              onClick={login}
-              sx={{ my: 2, display: 'block' }}
-            >
-              Login
-            </Button>
-            <Button
-              color='inherit'
-              href='/register'
-              onClick={login}
-              sx={{ my: 2, display: 'block' }}
-            >
-              Register
-            </Button>
-          </Box>
-          <Box sx={{ flexGrow: 0 }}>
-            <Tooltip title='Open settings'>
-              <IconButton onClick={handleOpenUserMenu} sx={{ p: 0 }}>
-                <Avatar alt='Remy Sharp' src='/static/images/avatar/2.jpg' />
-              </IconButton>
-            </Tooltip>
-            <Menu
-              sx={{ mt: '45px' }}
-              id='menu-appbar'
-              anchorEl={anchorElUser}
-              anchorOrigin={{
-                vertical: 'top',
-                horizontal: 'right',
-              }}
-              keepMounted
-              transformOrigin={{
-                vertical: 'top',
-                horizontal: 'right',
-              }}
-              open={Boolean(anchorElUser)}
-              onClose={handleCloseUserMenu}
-            >
-              {settings.map((setting) => (
-                <MenuItem key={setting} onClick={handleCloseUserMenu}>
-                  <Typography textAlign='center'>{setting}</Typography>
-                </MenuItem>
-              ))}
-            </Menu>
-          </Box>
+          {!loading && (
+            <Fragment>{isAuthenticated ? authLinks : guestLinks}</Fragment>
+          )}
         </Toolbar>
       </Container>
     </AppBar>
   );
 };
-export default Navbar;
+
+Navbar.propTypes = {
+  logout: PropTypes.func.isRequired,
+  auth: PropTypes.object.isRequired,
+};
+
+const mapStateToProps = (state) => ({
+  auth: state.auth,
+});
+
+export default connect(mapStateToProps, { logout })(Navbar);

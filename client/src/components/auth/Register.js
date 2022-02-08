@@ -23,7 +23,7 @@ const paperStyle = {
 };
 const btnstyle = { margin: '8px 0' };
 
-const Register = ({ register, isAutenticated }) => {
+const Register = ({ register, isAuthenticated }) => {
   const [formData, setFormData] = useState({
     firstName: '',
     lastName: '',
@@ -46,7 +46,7 @@ const Register = ({ register, isAutenticated }) => {
     }
   };
 
-  if (isAutenticated) {
+  if (isAuthenticated) {
     return <Navigate to='/dashboard' />;
   }
 
