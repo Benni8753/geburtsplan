@@ -1,150 +1,182 @@
-import React, { Fragment, useState } from 'react';
-import { connect } from 'react-redux';
-import { PropTypes } from 'prop-types';
-import Checkbox from '@material-ui/core/Checkbox';
-import { register } from '../../actions/auth';
+import React, { Fragment, useState, useEffect } from 'react';
+import { TextField, Button, Box, Grid, Paper } from '@mui/material';
+import { Field, Form, Formik } from 'formik';
 import { Navigate } from 'react-router-dom';
-import FormControlLabel from '@material-ui/core/FormControlLabel';
-import {
-  Grid,
-  Paper,
-  TextField,
-  Button,
-  Typography,
-  Link,
-} from '@mui/material';
+import { PropTypes } from 'prop-types';
+import { connect } from 'react-redux';
+import { object, string, ref } from 'yup';
+import { makeStyles } from '@material-ui/core';
+import { onRegister } from '../../actions/auth';
+import Spinner from '../layout/Spinner';
+import Alert from '../layout/Alert';
 
-const paperStyle = {
-  padding: 20,
-  height: '85vh',
-  margin: '20px auto',
-  minWidth: '200px',
-  maxWidth: '500px',
-};
-const btnstyle = { margin: '8px 0' };
+const useStyles = makeStyles({
+  textfield: {
+    marginTop: 0,
+  },
+  field: {
+    marginTop: 20,
+    marginBottom: 20,
+    display: 'block',
+  },
+  paperStyle: {
+    padding: 20,
+    height: '100vh',
+    margin: '20px auto',
+    minWidth: '200px',
+    maxWidth: '500px',
+  },
+  button: {
+    // margin: '8px 0',
+  },
+});
 
-const Register = ({ register, isAuthenticated }) => {
-  const [formData, setFormData] = useState({
-    firstName: '',
-    lastName: '',
-    email: '',
-    password: '',
-    password2: '',
-  });
+const Register = ({ alerts, onRegister, isAuthenticated }) => {
+  const [loading, setLoading] = useState(true);
 
-  const { firstName, lastName, email, password, password2 } = formData;
+  useEffect(() => {
+    const loadData = async () => {
+      await new Promise((r) => setTimeout(r, 500));
+      setLoading((loading) => !loading);
+    };
 
-  const onChange = (e) =>
-    setFormData({ ...formData, [e.target.name]: e.target.value });
+    loadData();
+  }, []);
 
-  const onSubmit = async (e) => {
-    e.preventDefault();
-    if (password !== password2) {
-      console.log('passwords do not match');
-    } else {
-      register({ firstName, lastName, email, password });
-    }
-  };
+  const classes = useStyles();
+  const formData = { email: '', firstName: '', lastName: '', password: '', password2: '' };
+  const [emailExist, setEmailExist] = useState(false);
 
   if (isAuthenticated) {
     return <Navigate to='/dashboard' />;
   }
 
   return (
-    <Fragment>
-      <Grid>
-        <Paper elevation={10} style={paperStyle}>
-          <Grid align='center'>
-            <h2>Sign Up</h2>
+    <section>
+      {loading ? (
+        <Spinner />
+      ) : (
+        <Fragment>
+          <Grid>
+            <Paper elevation={10} className={classes.paperStyle}>
+              <Grid align='center'>
+                <h2>Sign Up</h2>
+              </Grid>
+              <Formik
+                initialValues={formData}
+                onSubmit={(values, formikHelpers) => {
+                  const { firstName, lastName, email, password } = values;
+                  //   formikHelpers.resetForm();
+                  if (!isAuthenticated) {
+                    setEmailExist(true);
+                  }
+                  onRegister({ firstName, lastName, email, password });
+                  console.log(alerts);
+                }}
+                validationSchema={object({
+                  email: string().required('Please provide a valid email address').email('Invalid email'),
+                  firstName: string().required('Please enter your name').min(2, 'The entered name is too short'),
+                  lastName: string().required('Please enter your name').min(2, 'The entered name is too short'),
+                  password: string().required('Please enter a password').min(6, 'minimum of 6 characters'),
+                  password2: string()
+                    .required('Please confirm your password')
+                    .min(6, 'minimum of 6 characters')
+                    .oneOf([ref('password'), null], 'Passwords must match'),
+                })}>
+                {({ errors, isValid, touched, dirty }) => (
+                  <Form>
+                    <Field
+                      name='email'
+                      margin='normal'
+                      type='email'
+                      as={TextField}
+                      variant='outlined'
+                      color='secondary'
+                      label='Email'
+                      fullWidth
+                      error={(Boolean(errors.email) && Boolean(touched.email)) || emailExist}
+                      helperText={(Boolean(touched.email) && errors.email) || ' '}
+                    />
+                    <Box height={14} />
+                    <Field
+                      name='firstName'
+                      type='firstName'
+                      as={TextField}
+                      variant='outlined'
+                      color='secondary'
+                      label='Given Name'
+                      fullWidth
+                      error={Boolean(errors.firstName) && Boolean(touched.firstName)}
+                      helperText={(Boolean(touched.firstName) && errors.firstName) || ' '}
+                    />
+                    <Box height={14} />
+                    <Field
+                      name='lastName'
+                      type='lastName'
+                      as={TextField}
+                      variant='outlined'
+                      color='secondary'
+                      label='Surname'
+                      fullWidth
+                      error={Boolean(errors.lastName) && Boolean(touched.lastName)}
+                      helperText={(Boolean(touched.lastName) && errors.lastName) || ' '}
+                    />
+                    <Box height={14} />
+                    <Field
+                      name='password'
+                      type='password'
+                      as={TextField}
+                      variant='outlined'
+                      color='secondary'
+                      label='Password'
+                      fullWidth
+                      error={Boolean(errors.password) && Boolean(touched.password)}
+                      helperText={(Boolean(touched.password) && errors.password) || ' '}
+                    />
+                    <Box height={14} />
+                    <Field
+                      name='password2'
+                      type='password'
+                      as={TextField}
+                      variant='outlined'
+                      color='secondary'
+                      label='Confirm Password'
+                      fullWidth
+                      error={Boolean(errors.password2) && Boolean(touched.password2)}
+                      helperText={(Boolean(touched.password2) && errors.password2) || ' '}
+                    />
+                    <Box height={14} />
+                    <Button
+                      disabled={!dirty || !isValid}
+                      fullWidth
+                      type='submit'
+                      variant='contained'
+                      size='large'
+                      color='secondary'
+                      className={classes.button}>
+                      Sign up
+                    </Button>
+                    <Alert timeout={1000} />
+                  </Form>
+                )}
+              </Formik>
+            </Paper>
           </Grid>
-          <form onSubmit={onSubmit}>
-            <TextField
-              color='secondary'
-              name='email'
-              type='email'
-              value={email}
-              onChange={(e) => onChange(e)}
-              label='Email'
-              placeholder='Enter email address'
-              fullWidth
-              required
-            />
-            <TextField
-              color='secondary'
-              label='First Name'
-              placeholder='Enter your first name'
-              fullWidth
-              required
-              name='firstName'
-              value={firstName}
-              onChange={(e) => onChange(e)}
-            />
-            <TextField
-              color='secondary'
-              label='Last Name'
-              placeholder='Enter your last name'
-              fullWidth
-              required
-              name='lastName'
-              value={lastName}
-              onChange={(e) => onChange(e)}
-            />
-            <TextField
-              color='secondary'
-              label='Password'
-              placeholder='Enter password'
-              type='password'
-              fullWidth
-              required
-              name='password'
-              value={password}
-              onChange={(e) => onChange(e)}
-            />
-            <TextField
-              color='secondary'
-              label='Confirm Password'
-              placeholder='Confirm your password'
-              type='password'
-              fullWidth
-              required
-              name='password2'
-              value={password2}
-              onChange={(e) => onChange(e)}
-            />
-            <FormControlLabel
-              control={<Checkbox name='checkedB' color='secondary' />}
-              label='Remember me'
-            />
-            <Button
-              type='submit'
-              color='secondary'
-              variant='outlined'
-              style={btnstyle}
-              fullWidth
-            >
-              Sign up
-            </Button>
-          </form>
-          <Typography>
-            {' '}
-            Do you have an account ?
-            <Link color='secondary' href='/login'>
-              Sign In
-            </Link>
-          </Typography>
-        </Paper>
-      </Grid>
-    </Fragment>
+        </Fragment>
+      )}
+    </section>
   );
 };
 
 Register.propTypes = {
-  register: PropTypes.func.isRequired,
+  onRegister: PropTypes.func.isRequired,
   isAuthenticated: PropTypes.bool,
+  alerts: PropTypes.array.isRequired,
 };
 
 const mapStateToProps = (state) => ({
   isAuthenticated: state.auth.isAuthenticated,
+  alerts: state.alert,
 });
 
-export default connect(mapStateToProps, { register })(Register);
+export default connect(mapStateToProps, { onRegister })(Register);

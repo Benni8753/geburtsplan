@@ -1,15 +1,8 @@
 import { red } from '@material-ui/core/colors';
 import axios from 'axios';
+import { setAlert } from './alert';
 import setAuthToken from '../utils/setAuthToken';
-import {
-  REGISTER_FAIL,
-  REGISTER_SUCCESS,
-  USER_LOADED,
-  AUTH_ERROR,
-  LOGIN_FAIL,
-  LOGOUT,
-  LOGIN_SUCCESS,
-} from './types';
+import { REGISTER_FAIL, REGISTER_SUCCESS, USER_LOADED, AUTH_ERROR, LOGIN_FAIL, LOGOUT, LOGIN_SUCCESS } from './types';
 
 // Load user
 export const loadUser = () => async (dispatch) => {
@@ -33,7 +26,7 @@ export const loadUser = () => async (dispatch) => {
 };
 
 // Register User
-export const register =
+export const onRegister =
   ({ firstName, lastName, email, password }) =>
   async (dispatch) => {
     const config = {
@@ -53,6 +46,11 @@ export const register =
       });
       dispatch(loadUser());
     } catch (err) {
+      const errors = err.response.data.errors;
+      if (errors) {
+        errors.forEach((error) => dispatch(setAlert(error.msg, 'error', 10000)));
+      }
+
       dispatch({ type: REGISTER_FAIL });
     }
   };
@@ -74,9 +72,14 @@ export const login = (email, password) => async (dispatch) => {
       type: LOGIN_SUCCESS,
       payload: res.data,
     });
-    
+
     dispatch(loadUser());
   } catch (err) {
+    const errors = err.response.data.errors;
+    if (errors) {
+      errors.forEach((error) => dispatch(setAlert(error.msg, 'danger')));
+    }
+
     dispatch({ type: LOGIN_FAIL });
   }
 };

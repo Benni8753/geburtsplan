@@ -19,10 +19,7 @@ router.post(
     check('lastName', 'Name is required').not().isEmpty(),
     check('firstName', 'Name is required').not().isEmpty(),
     check('email', 'Please include a valid email').isEmail(),
-    check(
-      'password',
-      'Please enter a password with 1 or more characters'
-    ).isLength({ min: 1 }),
+    check('password', 'Please enter a password with 1 or more characters').isLength({ min: 1 }),
   ],
   async (req, res) => {
     const errors = validationResult(req);
@@ -38,9 +35,7 @@ router.post(
       let user = await User.findOne({ email });
 
       if (user) {
-        return res
-          .status(400)
-          .json({ errors: [{ msg: 'User already exists' }] });
+        return res.status(400).json({ errors: [{ msg: 'This email address is already registered' }] });
       }
 
       //if user is not existing..
@@ -74,9 +69,7 @@ router.post(
       );
     } catch (err) {
       console.error(err.message);
-      res
-        .status(500)
-        .send('server error coming from users.js / 1. try catch block');
+      res.status(500).send('server error coming from users.js / 1. try catch block');
     }
   }
 );
@@ -93,10 +86,7 @@ router.post(
     check('lastName', 'Name is required').not().isEmpty(),
     check('firstName', 'Name is required').not().isEmpty(),
     check('email', 'Please include a valid email').isEmail(),
-    check(
-      'password',
-      'Please enter a password with 1 or more characters'
-    ).isLength({ min: 1 }),
+    check('password', 'Please enter a password with 1 or more characters').isLength({ min: 1 }),
   ],
   async (req, res) => {
     const errors = validationResult(req);
@@ -116,9 +106,7 @@ router.post(
           firstName: firstName,
         });
         await user.save();
-        return res
-          .status(200)
-          .json({ errors: [{ msg: 'first name has been changed' }] });
+        return res.status(200).json({ errors: [{ msg: 'first name has been changed' }] });
       }
 
       //if the user does not exists?
