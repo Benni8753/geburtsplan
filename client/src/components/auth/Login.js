@@ -1,119 +1,161 @@
-import React, { Fragment, useState } from 'react';
-import Checkbox from '@material-ui/core/Checkbox';
-import FormControlLabel from '@material-ui/core/FormControlLabel';
-import { connect } from 'react-redux';
-import PropTypes from 'prop-types';
-import { login } from '../../actions/auth';
+import React, { Fragment, useState, useEffect } from 'react';
+import { TextField, Button, Box, Grid, Paper, Typography, Link } from '@mui/material';
+import LoadingButton from '@mui/lab/LoadingButton';
+import { Field, Form, Formik } from 'formik';
 import { Navigate } from 'react-router-dom';
+import { PropTypes } from 'prop-types';
+import { connect } from 'react-redux';
+import { object, string, ref } from 'yup';
+import { makeStyles } from '@material-ui/core';
+import { login } from '../../actions/auth';
+import Spinner from '../layout/Spinner';
+import Alert from '../layout/Alert';
 
-import {
-  Grid,
-  Paper,
-  TextField,
-  Button,
-  Typography,
-  Link,
-} from '@mui/material';
+const useStyles = makeStyles({
+  textfield: {
+    marginTop: 0,
+  },
+  field: {
+    marginTop: 20,
+    marginBottom: 20,
+    display: 'block',
+  },
+  paperStyle: {
+    padding: 20,
+    height: '100%',
+    margin: '20px auto',
+    minWidth: '200px',
+    maxWidth: '500px',
+  },
+  button: {
+    margin: '8px 0',
+  },
+  options: {
+    marginTop: 20,
+  },
+  signup: {
+    marginLeft: 10,
+  },
+});
 
-const paperStyle = {
-  padding: 20,
-  height: '85vh',
-  margin: '20px auto',
-  minWidth: '200px',
-  maxWidth: '500px',
-};
-const btnstyle = { margin: '8px 0' };
+const Login = ({ alerts, login, isAuthenticated }) => {
+  const [loading, setLoading] = useState(true);
 
-const Login = ({ login, isAuthenticated }) => {
-  const [formData, setFormData] = useState({
-    email: '',
-    password: '',
-  });
+  useEffect(() => {
+    const loadData = async () => {
+      await new Promise((r) => setTimeout(r, 500));
+      setLoading((loading) => !loading);
+    };
 
-  const { email, password } = formData;
+    loadData();
+  }, []);
 
-  const onChange = (e) =>
-    setFormData({ ...formData, [e.target.name]: e.target.value });
+  const classes = useStyles();
+  const formData = { email: '', password: '' };
+  const [btnLoading, setBtnLoading] = useState(false);
 
-  const onSubmit = async (e) => {
-    e.preventDefault();
-    login(email, password);
-  };
-
-  // redirect if login
   if (isAuthenticated) {
     return <Navigate to='/dashboard' />;
   }
 
   return (
-    <Fragment>
-      <Grid>
-        <Paper elevation={10} style={paperStyle}>
-          <Grid align='center'>
-            <h2>Sign In</h2>
-          </Grid>
-          <form onSubmit={onSubmit}>
-            <TextField
-              color='secondary'
-              name='email'
-              value={email}
-              onChange={(e) => onChange(e)}
-              label='Email'
-              placeholder='Enter email address'
-              fullWidth
-              required
-            />
-            <TextField
-              color='secondary'
-              label='Password'
-              placeholder='Enter password'
-              type='password'
-              fullWidth
-              required
-              name='password'
-              value={password}
-              onChange={(e) => onChange(e)}
-            />
-            <FormControlLabel
-              control={<Checkbox name='checkedB' color='secondary' />}
-              label='Remember me'
-            />
-            <Button
-              type='submit'
-              color='secondary'
-              variant='outlined'
-              style={btnstyle}
-              fullWidth
-            >
-              Sign In
-            </Button>
-          </form>
-          <Typography>
-            <Link color='secondary' href='#'>
-              Forgot password ?
-            </Link>
-          </Typography>
+    <section>
+      {loading ? (
+        <Spinner />
+      ) : (
+        <Fragment>
+          <Grid>
+            <Paper elevation={10} className={classes.paperStyle}>
+              <Grid align='center'>
+                <h2>Sign in</h2>
+              </Grid>
+              <Formik
+                initialValues={formData}
+                onSubmit={(values, formikHelpers) => {
+                  setBtnLoading(true);
+                  const { email, password } = values;
+                  //   formikHelpers.resetForm();
 
-          <Typography>
-            {' '}
-            Don't have an account ?
-            <Link color='secondary' href='/register'>
-              Sign Up
-            </Link>
-          </Typography>
-        </Paper>
-      </Grid>
-    </Fragment>
+                  login(email, password);
+                  console.log(alerts);
+                  setTimeout(() => setBtnLoading(false), 1000);
+                }}
+                validationSchema={object({
+                  email: string().required('Please provide a valid email address').email('Invalid email'),
+                  password: string().required('Please enter a password').min(6, 'minimum of 6 characters'),
+                })}>
+                {({ errors, isValid, touched, dirty }) => (
+                  <Form>
+                    <Field
+                      name='email'
+                      margin='normal'
+                      type='email'
+                      as={TextField}
+                      variant='outlined'
+                      color='secondary'
+                      label='Email'
+                      fullWidth
+                      error={Boolean(errors.email) && Boolean(touched.email)}
+                      helperText={(Boolean(touched.email) && errors.email) || ' '}
+                    />
+                    <Box height={14} />
+                    <Field
+                      name='password'
+                      type='password'
+                      as={TextField}
+                      variant='outlined'
+                      color='secondary'
+                      label='Password'
+                      fullWidth
+                      error={Boolean(errors.password) && Boolean(touched.password)}
+                      helperText={(Boolean(touched.password) && errors.password) || ' '}
+                    />
+
+                    <Box height={14} />
+                    <LoadingButton
+                      loading={btnLoading}
+                      // disabled={!dirty || !isValid}
+                      fullWidth
+                      type='submit'
+                      variant='contained'
+                      size='large'
+                      color='secondary'
+                      className={classes.button}>
+                      Sign in
+                    </LoadingButton>
+                    <Alert />
+                  </Form>
+                )}
+              </Formik>
+              <Typography className={classes.options}>
+                <Link color='secondary' href='#'>
+                  Forgot password?
+                </Link>
+              </Typography>
+              <Typography className={classes.options}>
+                {' '}
+                Don't have an account?
+                <Link color='secondary' href='/register' className={classes.signup}>
+                  Sign Up
+                </Link>
+              </Typography>
+            </Paper>
+          </Grid>
+        </Fragment>
+      )}
+    </section>
   );
 };
 
 Login.propTypes = {
   login: PropTypes.func.isRequired,
   isAuthenticated: PropTypes.bool,
+  alerts: PropTypes.array.isRequired,
 };
 
 const mapStateToProps = (state) => ({
   isAuthenticated: state.auth.isAuthenticated,
+  alerts: state.alert,
 });
 
 export default connect(mapStateToProps, { login })(Login);

@@ -1,5 +1,6 @@
 import React, { Fragment, useState, useEffect } from 'react';
 import { TextField, Button, Box, Grid, Paper } from '@mui/material';
+import LoadingButton from '@mui/lab/LoadingButton';
 import { Field, Form, Formik } from 'formik';
 import { Navigate } from 'react-router-dom';
 import { PropTypes } from 'prop-types';
@@ -21,14 +22,17 @@ const useStyles = makeStyles({
   },
   paperStyle: {
     padding: 20,
-    height: '100vh',
+    height: '100%',
     margin: '20px auto',
     minWidth: '200px',
     maxWidth: '500px',
   },
   button: {
-    // margin: '8px 0',
+    margin: '8px 0',
   },
+  // alert: {
+  //   paddingTop: 10,
+  // },
 });
 
 const Register = ({ alerts, onRegister, isAuthenticated }) => {
@@ -46,6 +50,7 @@ const Register = ({ alerts, onRegister, isAuthenticated }) => {
   const classes = useStyles();
   const formData = { email: '', firstName: '', lastName: '', password: '', password2: '' };
   const [emailExist, setEmailExist] = useState(false);
+  const [btnLoading, setBtnLoading] = useState(false);
 
   if (isAuthenticated) {
     return <Navigate to='/dashboard' />;
@@ -65,6 +70,7 @@ const Register = ({ alerts, onRegister, isAuthenticated }) => {
               <Formik
                 initialValues={formData}
                 onSubmit={(values, formikHelpers) => {
+                  setBtnLoading(true);
                   const { firstName, lastName, email, password } = values;
                   //   formikHelpers.resetForm();
                   if (!isAuthenticated) {
@@ -72,6 +78,7 @@ const Register = ({ alerts, onRegister, isAuthenticated }) => {
                   }
                   onRegister({ firstName, lastName, email, password });
                   console.log(alerts);
+                  setTimeout(() => setBtnLoading(false), 1000);
                 }}
                 validationSchema={object({
                   email: string().required('Please provide a valid email address').email('Invalid email'),
@@ -146,8 +153,9 @@ const Register = ({ alerts, onRegister, isAuthenticated }) => {
                       helperText={(Boolean(touched.password2) && errors.password2) || ' '}
                     />
                     <Box height={14} />
-                    <Button
-                      disabled={!dirty || !isValid}
+                    <LoadingButton
+                      loading={btnLoading}
+                      // disabled={!dirty || !isValid}
                       fullWidth
                       type='submit'
                       variant='contained'
@@ -155,8 +163,8 @@ const Register = ({ alerts, onRegister, isAuthenticated }) => {
                       color='secondary'
                       className={classes.button}>
                       Sign up
-                    </Button>
-                    <Alert timeout={1000} />
+                    </LoadingButton>
+                    <Alert />
                   </Form>
                 )}
               </Formik>

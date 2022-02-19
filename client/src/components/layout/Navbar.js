@@ -1,32 +1,27 @@
-import React, { Fragment } from 'react';
+import React, { useState } from 'react';
+import AccountCircle from '@mui/icons-material/AccountCircle';
 import MenuIcon from '@mui/icons-material/Menu';
 import { connect } from 'react-redux';
 import { logout } from '../../actions/auth';
 import PropTypes from 'prop-types';
 import {
   Typography,
+  Link,
   AppBar,
   Box,
   Toolbar,
   IconButton,
   Menu,
   Container,
-  Avatar,
   Button,
   Tooltip,
   MenuItem,
 } from '@mui/material';
 
-const settings = ['Profile', 'Account', 'Dashboard', 'Logout'];
-//Hooks
-const Navbar = ({ auth: { isAuthenticated, loading }, logout }) => {
-  const [anchorElNav, setAnchorElNav] = React.useState(null);
-  const [anchorElUser, setAnchorElUser] = React.useState(null);
-
-  //Functions
-  const login = () => {
-    handleCloseNavMenu();
-  };
+const Navbar = ({ auth: { isAuthenticated, loading, user }, logout }) => {
+  const [anchorElNav, setAnchorElNav] = useState(null);
+  const [anchorElUser, setAnchorElUser] = useState(null);
+  const guestLinkProps = ['Login', 'Register', 'Pricing', 'About'];
 
   const handleOpenNavMenu = (event) => {
     setAnchorElNav(event.currentTarget);
@@ -44,49 +39,19 @@ const Navbar = ({ auth: { isAuthenticated, loading }, logout }) => {
   };
 
   const authLinks = (
-    <Fragment>
-      <Box
-        component='img'
-        variant='h6'
-        noWrap
-        sx={{
-          height: 40,
-          width: 45,
-          display: { xs: 'flex', md: 'none' },
-        }}
-        alt='Logo image'
-        src='./logo_ph.png'
-      />
+    <>
       <Box sx={{ flexGrow: 1, display: { xs: 'none', md: 'flex' } }}>
-        <Button
-          alignContent='center'
-          alignItems='center'
-          color='inherit'
-          href='/'
-          onClick={logout}
-          sx={{ my: 2, display: 'block' }}
-        >
-          Logout
-        </Button>
-        <Button
-          color='inherit'
-          href='/dashboard'
-          sx={{ my: 2, display: 'block' }}
-        >
+        <Button color='inherit' href='/dashboard' sx={{ my: 2, display: 'block' }}>
           Dashboard
         </Button>
-        <Button
-          color='inherit'
-          href='/dashboard'
-          sx={{ my: 2, display: 'block' }}
-        >
+        <Button color='inherit' href='/blog' sx={{ my: 2, display: 'block' }}>
           Blog
         </Button>
       </Box>
       <Box sx={{ flexGrow: 0 }}>
         <Tooltip title='Open settings'>
           <IconButton onClick={handleOpenUserMenu} sx={{ p: 0 }}>
-            <Avatar alt='Remy Sharp' src='/static/images/avatar/2.jpg' />
+            <AccountCircle fontSize='large' />
           </IconButton>
         </Tooltip>
         <Menu
@@ -103,66 +68,64 @@ const Navbar = ({ auth: { isAuthenticated, loading }, logout }) => {
             horizontal: 'right',
           }}
           open={Boolean(anchorElUser)}
-          onClose={handleCloseUserMenu}
-        >
-          {settings.map((setting) => (
-            <MenuItem key={setting} onClick={handleCloseUserMenu}>
-              <Typography textAlign='center'>{setting}</Typography>
-            </MenuItem>
-          ))}
+          onClose={handleCloseUserMenu}>
+          <MenuItem onClick={handleCloseUserMenu}>
+            <Typography onClick={logout}>Logout</Typography>
+          </MenuItem>
         </Menu>
       </Box>
-    </Fragment>
+    </>
+  );
+
+  const authMobileLinks = (
+    <>
+      <MenuItem>
+        <Typography textAlign='center'>
+          <Link href='/dashboard' color='inherit' underline='none'>
+            Dashboard
+          </Link>
+        </Typography>
+      </MenuItem>
+      <MenuItem>
+        <Typography textAlign='center'>
+          <Link href='/blog' color='inherit' underline='none'>
+            Blog
+          </Link>
+        </Typography>
+      </MenuItem>
+    </>
+  );
+
+  const guestMobileLinks = (
+    <>
+      {guestLinkProps.map((page) => (
+        <MenuItem key={page}>
+          <Typography textAlign='center'>
+            <Link href={page.toLocaleLowerCase()} color='inherit' underline='none'>
+              {page}
+            </Link>
+          </Typography>
+        </MenuItem>
+      ))}
+    </>
   );
 
   const guestLinks = (
-    <Fragment>
-      <Box
-        component='img'
-        variant='h6'
-        noWrap
-        sx={{
-          height: 40,
-          width: 45,
-          display: { xs: 'flex', md: 'none' },
-        }}
-        alt='Logo image'
-        src='./logo_ph.png'
-      />
+    <>
       <Box sx={{ flexGrow: 1, display: { xs: 'none', md: 'flex' } }}>
-        <Button
-          color='inherit'
-          href='/login'
-          onClick={login}
-          sx={{ my: 2, display: 'block' }}
-        >
-          Login
-        </Button>
-        <Button
-          color='inherit'
-          href='/register'
-          onClick={login}
-          sx={{ my: 2, display: 'block' }}
-        >
-          Register
-        </Button>
+        {guestLinkProps.map((page) => (
+          <Button key={page} color='inherit' href={page} sx={{ my: 2, display: 'block' }}>
+            {page}
+          </Button>
+        ))}
       </Box>
-    </Fragment>
+    </>
   );
 
   return (
     <AppBar position='static'>
       <Container maxWidth='xl'>
         <Toolbar disableGutters>
-          {/* <Typography
-            href='/'
-            variant='h6'
-            noWrap
-            component='div'
-            sx={{ mr: 2, display: { xs: 'none', md: 'flex' } }}
-          >
-            LOGO
-          </Typography> */}
           <Box
             component='img'
             sx={{
@@ -182,8 +145,7 @@ const Navbar = ({ auth: { isAuthenticated, loading }, logout }) => {
               aria-controls='menu-appbar'
               aria-haspopup='true'
               onClick={handleOpenNavMenu}
-              color='inherit'
-            >
+              color='inherit'>
               <MenuIcon />
             </IconButton>
             <Menu
@@ -202,25 +164,30 @@ const Navbar = ({ auth: { isAuthenticated, loading }, logout }) => {
               onClose={handleCloseNavMenu}
               sx={{
                 display: { xs: 'block', md: 'none' },
-              }}
-            >
-              <MenuItem onClick={login}>
-                <Typography textAlign='center'>Login</Typography>
-              </MenuItem>
+              }}>
+              {!loading && <>{isAuthenticated ? authMobileLinks : guestMobileLinks}</>}
             </Menu>
           </Box>
-          {/* <Typography
+          <Typography
             href='/'
             variant='h6'
             noWrap
             component='div'
-            sx={{ flexGrow: 1, display: { xs: 'flex', md: 'none' } }}
-          >
-            LOGO
-          </Typography> */}
-          {!loading && (
-            <Fragment>{isAuthenticated ? authLinks : guestLinks}</Fragment>
-          )}
+            sx={{ flexGrow: 1, display: { xs: 'flex', md: 'none' } }}>
+            <Box
+              component='img'
+              variant='h6'
+              noWrap
+              sx={{
+                height: 40,
+                width: 45,
+                display: { xs: 'flex', md: 'none' },
+              }}
+              alt='Logo image'
+              src='./logo_ph.png'
+            />
+          </Typography>
+          {!loading && <>{isAuthenticated ? authLinks : guestLinks}</>}
         </Toolbar>
       </Container>
     </AppBar>
